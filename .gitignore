@@ -1,0 +1,18 @@
+# Fortran compilation products
+*.o
+*.mod
+*.smod
+
+# Build directory
+build/
+
+# Executables
+mesh_domain
+mesh_add
+mesh_generate
+network_maps
+locate
+
+# Generated mesh and results
+*.vtk
+*.msh
