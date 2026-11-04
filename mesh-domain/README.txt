@@ -41,5 +41,23 @@ duplicates, overlong arguments, malformed values and non-positive lengths.
 The SGRAC triangle writer is not used: this stage writes boundary lines,
 not a triangular mesh, and does not need LAT_mesh or Gmsh.
 
-Validation: mesh_domain.f90 parsed as Fortran 2008. No Fortran compiler was
-available in the authoring environment; compile/run validation remains local.
+Shared VTK writing:
+../src/vtk_io.f90 now owns the legacy ASCII serialization. mesh_domain keeps
+argument parsing, rectangle construction and the meanings of metadata.
+All original field names, types, values, associations and precision remain.
+Build from this directory as before; Make compiles the shared module first.
+Keep the repository layout: the source is shared with future programs.
+
+This is a writer-only extraction, following SGRAC's small unit-based routines.
+It deliberately does not reuse SGRAC's triangle reader, which skips metadata.
+Future readers must retain every input array, including unknown names, and
+writers must carry them forward. Unsupported content must raise an error,
+not silently disappear. Only explicit additions or updates are permitted.
+The current source stage reads no input, so no round-trip reader is added yet.
+
+Validation:
+No execution environment was available for this refactor. Compile and compare
+against the parent revision with:
+  sh tests/compare_parent.sh
+The check builds both versions separately and compares their entire stdout
+byte-for-byte for square, rectangular and high-precision domains.
