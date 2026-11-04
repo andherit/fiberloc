@@ -4,9 +4,13 @@ program mesh_domain
    use, intrinsic :: iso_fortran_env, only : real64, output_unit, error_unit
    use, intrinsic :: ieee_arithmetic, only : ieee_is_finite
    use forparse, only : parse_arg, PARSE_OK
+   use vtk_io, only : vtk_header, vtk_field_begin, vtk_field_int, vtk_field_real, &
+      vtk_points, vtk_lines, vtk_cell_data, vtk_scalar_int
    implicit none
 
    real(real64) :: lx, ly, sl
+   real(real64) :: xyz(3,4), bounds(6)
+   integer :: edges(2,4)
    integer :: i, n, eq, arg_length, key_index
    logical :: seen(3)
    character(len=100) :: arg
@@ -51,43 +55,26 @@ program mesh_domain
    call positive_real('ly',ly)
    call positive_real('sl',sl)
 
-   ! All arguments are validated before writing anything to stdout.
-   ! FIELD precedes geometry: these are dataset-level attributes, not values
-   ! attached to boundary points or cells. Bounds use the VTK ordering
-   ! xmin,xmax,ymin,ymax,zmin,zmax; all lengths share the same user-chosen unit.
-   write(output_unit,'(a)') '# vtk DataFile Version 3.0'
-   write(output_unit,'(a)') 'mesh_domain: rectangular planar geometry'
-   write(output_unit,'(a)') 'ASCII'
-   write(output_unit,'(a)') 'DATASET POLYDATA'
-   write(output_unit,'(a)') 'FIELD FieldData 3'
-   write(output_unit,'(a)') 'schema_version 1 1 int'
-   write(output_unit,'(i0)') 1
-   write(output_unit,'(a)') 'domain_bounds 6 1 double'
-   write(output_unit,'(6(es24.16e3,1x))') 0._real64,lx,0._real64,ly,0._real64,0._real64
-   write(output_unit,'(a)') 'mesh_size 1 1 double'
-   write(output_unit,'(es24.16e3)') sl
+   ! Geometry and field meanings belong here; VTK serialization belongs in
+   ! the shared module. All current fields are retained in their original order.
+   bounds = [0._real64,lx,0._real64,ly,0._real64,0._real64]
+   xyz(:,1) = [0._real64,0._real64,0._real64]
+   xyz(:,2) = [lx,0._real64,0._real64]
+   xyz(:,3) = [lx,ly,0._real64]
+   xyz(:,4) = [0._real64,ly,0._real64]
+   ! Counterclockwise edges, using zero-based VTK point IDs.
+   edges = reshape([0,1, 1,2, 2,3, 3,0],[2,4])
 
-   ! Four corners and four boundary edges, counterclockwise in the XY plane.
-   ! VTK connectivity is zero-based. LINES size = 4 * (2 node IDs + 1 count).
-   ! No triangles are generated; sl is a target size for mesh_generate later.
-   write(output_unit,'(a)') 'POINTS 4 double'
-   write(output_unit,'(3(es24.16e3,1x))') 0._real64,0._real64,0._real64
-   write(output_unit,'(3(es24.16e3,1x))') lx,0._real64,0._real64
-   write(output_unit,'(3(es24.16e3,1x))') lx,ly,0._real64
-   write(output_unit,'(3(es24.16e3,1x))') 0._real64,ly,0._real64
-   write(output_unit,'(a)') 'LINES 4 12'
-   write(output_unit,'(a)') '2 0 1','2 1 2','2 2 3','2 3 0'
-
-   ! Readable integer flags avoid string encodings or opaque role codes.
-   ! Future mesh_add must preserve these arrays, assigning 0 to non-boundary
-   ! cells. sensor_id=0 means this primitive is not a sensing instrument.
-   write(output_unit,'(a)') 'CELL_DATA 4'
-   write(output_unit,'(a)') 'SCALARS is_domain_boundary int 1'
-   write(output_unit,'(a)') 'LOOKUP_TABLE default'
-   write(output_unit,'(a)') '1 1 1 1'
-   write(output_unit,'(a)') 'SCALARS sensor_id int 1'
-   write(output_unit,'(a)') 'LOOKUP_TABLE default'
-   write(output_unit,'(a)') '0 0 0 0'
+   call vtk_header(output_unit,'mesh_domain: rectangular planar geometry')
+   call vtk_field_begin(output_unit,3)
+   call vtk_field_int(output_unit,'schema_version',reshape([1],[1,1]))
+   call vtk_field_real(output_unit,'domain_bounds',reshape(bounds,[6,1]))
+   call vtk_field_real(output_unit,'mesh_size',reshape([sl],[1,1]))
+   call vtk_points(output_unit,xyz)
+   call vtk_lines(output_unit,edges)
+   call vtk_cell_data(output_unit,4)
+   call vtk_scalar_int(output_unit,'is_domain_boundary',[1,1,1,1])
+   call vtk_scalar_int(output_unit,'sensor_id',[0,0,0,0])
    flush(output_unit)
 
 contains
