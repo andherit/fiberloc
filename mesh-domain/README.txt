@@ -2,8 +2,8 @@ mesh_domain -- first brick of the geometry pipeline
 
 Build and run (gfortran):
   make
-  ./mesh_domain lx=100 ly=100 sl=1. > domain.vtk
-  ./mesh_domain --help
+  ../bin/mesh_domain lx=100 ly=100 sl=1. > domain.vtk
+  ../bin/mesh_domain --help
 
 All three arguments are required, finite and strictly positive.
 The domain is [0,lx] x [0,ly], z=0. sl is the target triangle edge length
@@ -60,3 +60,14 @@ against the parent revision with:
   sh tests/compare_parent.sh
 The check builds both versions separately and compares their entire stdout
 byte-for-byte for square, rectangular and high-precision domains.
+
+Executables:
+Make now writes executables to the shared repository bin/ directory. Object
+and module files remain in each program's build/ directory. Each clean target
+removes only its own executable, not the other programs in bin/.
+Optionally override BIN_DIR with an absolute path when invoking make.
+
+From the repository root, add bin/ to PATH for the current shell:
+  export PATH="$PWD/bin:$PATH"
+Then run mesh_domain and mesh_add directly. For persistent use, add the same
+export with your actual absolute repository path to ~/.bashrc.

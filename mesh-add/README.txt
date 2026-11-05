@@ -5,11 +5,11 @@ Build from the repository root:
   make -C mesh-add
 
 Example (case 2 geometry, fixed centre, no earthquake yet):
-  ./mesh-domain/mesh_domain lx=100 ly=100 sl=1. \
-    | ./mesh-add/mesh_add primitive=point x=50 y=50 \
-    | ./mesh-add/mesh_add primitive=line id=1 x1=0 y1=60 x2=80 y2=100 \
-    | ./mesh-add/mesh_add primitive=line id=2 x1=0 y1=70 x2=60 y2=100 \
-    | ./mesh-add/mesh_add primitive=line id=3 x1=0 y1=50 x2=100 y2=90 \
+  ./bin/mesh_domain lx=100 ly=100 sl=1. \
+    | ./bin/mesh_add primitive=point x=50 y=50 \
+    | ./bin/mesh_add primitive=line id=1 x1=0 y1=60 x2=80 y2=100 \
+    | ./bin/mesh_add primitive=line id=2 x1=0 y1=70 x2=60 y2=100 \
+    | ./bin/mesh_add primitive=line id=3 x1=0 y1=50 x2=100 y2=90 \
     > geometry.vtk
 
 geometry.vtk can be opened in ParaView. This is geometry, not a triangular
@@ -72,3 +72,14 @@ coordinates, unknown metadata precision, invalid inputs, unsupported fields,
 empty stdout on rejection and a real OS pipeline.
 
 Validated with gfortran 13.3 and -fcheck=all, and Python VTK's legacy reader.
+
+Executables:
+Make now writes executables to the shared repository bin/ directory. Object
+and module files remain in each program's build/ directory. Each clean target
+removes only its own executable, not the other programs in bin/.
+Optionally override BIN_DIR with an absolute path when invoking make.
+
+From the repository root, add bin/ to PATH for the current shell:
+  export PATH="$PWD/bin:$PATH"
+Then run mesh_domain and mesh_add directly. For persistent use, add the same
+export with your actual absolute repository path to ~/.bashrc.

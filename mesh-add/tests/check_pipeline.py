@@ -5,10 +5,12 @@ result through vtkPolyDataReader (the same data model used by ParaView).
 """
 from pathlib import Path
 import subprocess
+import sys
 
 root = Path(__file__).resolve().parents[2]
-add = root / 'mesh-add/mesh_add'
-domain = root / 'mesh-domain/mesh_domain'
+bin_dir = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else root / 'bin'
+add = bin_dir / 'mesh_add'
+domain = bin_dir / 'mesh_domain'
 
 
 def run(exe, args, source=None, success=True):
