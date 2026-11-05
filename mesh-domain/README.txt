@@ -48,12 +48,11 @@ All original field names, types, values, associations and precision remain.
 Build from this directory as before; Make compiles the shared module first.
 Keep the repository layout: the source is shared with future programs.
 
-This is a writer-only extraction, following SGRAC's small unit-based routines.
-It deliberately does not reuse SGRAC's triangle reader, which skips metadata.
-Future readers must retain every input array, including unknown names, and
-writers must carry them forward. Unsupported content must raise an error,
-not silently disappear. Only explicit additions or updates are permitted.
-The current source stage reads no input, so no round-trip reader is added yet.
+The original writer extraction follows SGRAC's small unit-based routines.
+The shared module now also provides a preserving reader for mesh_add; see
+../mesh-add/README.txt for supported sections and explicit rejection policies.
+Unknown dataset metadata is retained. Attributes requiring undefined values
+on newly added geometry are rejected rather than silently dropped or padded.
 
 Validation:
 No execution environment was available for this refactor. Compile and compare
