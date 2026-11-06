@@ -2,8 +2,8 @@ mesh_domain -- first brick of the geometry pipeline
 
 Build and run (gfortran):
   make
-  ./mesh_domain lx=100 ly=100 sl=1. > domain.vtk
-  ./mesh_domain --help
+  ../bin/mesh_domain lx=100 ly=100 sl=1. > domain.vtk
+  ../bin/mesh_domain --help
 
 All three arguments are required, finite and strictly positive.
 The domain is [0,lx] x [0,ly], z=0. sl is the target triangle edge length
@@ -48,12 +48,11 @@ All original field names, types, values, associations and precision remain.
 Build from this directory as before; Make compiles the shared module first.
 Keep the repository layout: the source is shared with future programs.
 
-This is a writer-only extraction, following SGRAC's small unit-based routines.
-It deliberately does not reuse SGRAC's triangle reader, which skips metadata.
-Future readers must retain every input array, including unknown names, and
-writers must carry them forward. Unsupported content must raise an error,
-not silently disappear. Only explicit additions or updates are permitted.
-The current source stage reads no input, so no round-trip reader is added yet.
+The original writer extraction follows SGRAC's small unit-based routines.
+The shared module now also provides a preserving reader for mesh_add; see
+../mesh-add/README.txt for supported sections and explicit rejection policies.
+Unknown dataset metadata is retained. Attributes requiring undefined values
+on newly added geometry are rejected rather than silently dropped or padded.
 
 Validation:
 No execution environment was available for this refactor. Compile and compare
@@ -61,3 +60,14 @@ against the parent revision with:
   sh tests/compare_parent.sh
 The check builds both versions separately and compares their entire stdout
 byte-for-byte for square, rectangular and high-precision domains.
+
+Executables:
+Make now writes executables to the shared repository bin/ directory. Object
+and module files remain in each program's build/ directory. Each clean target
+removes only its own executable, not the other programs in bin/.
+Optionally override BIN_DIR with an absolute path when invoking make.
+
+From the repository root, add bin/ to PATH for the current shell:
+  export PATH="$PWD/bin:$PATH"
+Then run mesh_domain and mesh_add directly. For persistent use, add the same
+export with your actual absolute repository path to ~/.bashrc.

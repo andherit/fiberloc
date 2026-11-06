@@ -16,3 +16,6 @@ locate
 # Generated mesh and results
 *.vtk
 *.msh
+
+# Shared compiled executables
+/bin/
